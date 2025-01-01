@@ -5,10 +5,16 @@ GREEN := \033[1;32m
 RED := \033[1;31m
 YELLOW := \033[1;33m
 NC := \033[0m # No Color
+
 INFO := @echo "$(BLUE)INFO:$(NC)"
 SUCCESS := @echo "$(GREEN)SUCCESS:$(NC)"
 ERROR := @echo "$(RED)ERROR:$(NC)"
 WARN := @echo "$(YELLOW)WARN:$(NC)"
+
+INFO_T := echo "$(BLUE)INFO:$(NC)"
+SUCCESS_T := echo "$(GREEN)SUCCESS:$(NC)"
+ERROR_T := echo "$(RED)ERROR:$(NC)"
+WARN_T := echo "$(YELLOW)WARN:$(NC)"
 
 # Variables
 DOCKER_INSTALL_URL := https://get.docker.com
@@ -69,38 +75,39 @@ install-terraform:
 
 # Verify all installations
 verify-all:
-	$(INFO) Verifying all installations...
-	@if docker --version; then \
-		$(SUCCESS) Docker verification passed; \
+	$(INFO) "Verifying all installations..."
+	@if command -v docker >/dev/null 2>&1; then \
+		$(SUCCESS_T) "Docker verification passed"; \
 	else \
-		$(ERROR) Docker verification failed; \
+		$(ERROR_T) "Docker verification failed"; \
 		exit 1; \
 	fi
-	@if kubectl version --client; then \
-		$(SUCCESS) kubectl verification passed; \
+	@if command -v kubectl >/dev/null 2>&1; then \
+		$(SUCCESS_T) "kubectl verification passed"; \
 	else \
-		$(ERROR) kubectl verification failed; \
+		$(ERROR_T) "kubectl verification failed"; \
 		exit 1; \
 	fi
-	@if helm version; then \
-		$(SUCCESS) Helm verification passed; \
+	@if command -v helm >/dev/null 2>&1; then \
+		$(SUCCESS_T) "Helm verification passed"; \
 	else \
-		$(ERROR) Helm verification failed; \
+		$(ERROR_T) "Helm verification failed"; \
 		exit 1; \
 	fi
-	@if kind version; then \
-		$(SUCCESS) KIND verification passed; \
+	@if command -v kind >/dev/null 2>&1; then \
+		$(SUCCESS_T) "KIND verification passed"; \
 	else \
-		$(ERROR) KIND verification failed; \
+		$(ERROR_T) "KIND verification failed"; \
 		exit 1; \
 	fi
-	@if terraform version; then \
-		$(SUCCESS) Terraform verification passed; \
+	@if command -v terraform >/dev/null 2>&1; then \
+		$(SUCCESS_T) "Terraform verification passed"; \
 	else \
-		$(ERROR) Terraform verification failed; \
+		$(ERROR_T) "Terraform verification failed"; \
 		exit 1; \
 	fi
-	$(SUCCESS) All tools verified successfully
+	$(SUCCESS) "All tools verified successfully!"
+
 
 # Uninstall all tools
 uninstall-all:
@@ -109,54 +116,54 @@ uninstall-all:
 	$(INFO) Uninstalling Docker...
 	@if command -v docker > /dev/null; then \
 		for svc in docker.socket docker.service containerd.service; do \
-			sudo systemctl stop $$svc 2>/dev/null || true; \
+			systemctl stop $$svc 2>/dev/null || true; \
 		done; \
-		sudo apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
-		sudo apt-get autoremove -y; \
-		sudo rm -rf /var/lib/docker /var/lib/containerd /etc/docker; \
-		$(SUCCESS) Docker uninstalled; \
+		apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
+		apt-get autoremove -y; \
+		rm -rf /var/lib/docker /var/lib/containerd /etc/docker; \
+		$(SUCCESS_T) Docker uninstalled; \
 	else \
-		$(WARN) Docker not found; \
+		$(WARN_T) Docker not found; \
 	fi
 
 	# Uninstall kubectl
 	$(INFO) Uninstalling kubectl...
 	@if [ -f /usr/local/bin/kubectl ]; then \
-		sudo rm -f /usr/local/bin/kubectl; \
-		sudo rm -rf ~/.kube; \
-		$(SUCCESS) kubectl uninstalled; \
+		rm -f /usr/local/bin/kubectl; \
+		rm -rf ~/.kube; \
+		$(SUCCESS_T) kubectl uninstalled; \
 	else \
-		$(WARN) kubectl not found; \
+		$(WARN_T) kubectl not found; \
 	fi
 
 	# Uninstall Helm
 	$(INFO) Uninstalling Helm...
 	@if command -v helm > /dev/null; then \
-		sudo rm -f /usr/local/bin/helm; \
+		rm -f /usr/local/bin/helm; \
 		rm -rf ~/.helm; \
-		$(SUCCESS) Helm uninstalled; \
+		$(SUCCESS_T) Helm uninstalled; \
 	else \
-		$(WARN) Helm not found; \
+		$(WARN_T) Helm not found; \
 	fi
 
 	# Uninstall KIND
 	$(INFO) Uninstalling KIND...
 	@if command -v kind > /dev/null; then \
 		kind delete clusters --all 2>/dev/null || true; \
-		sudo rm -f /usr/local/bin/kind; \
-		$(SUCCESS) KIND uninstalled; \
+		rm -f /usr/local/bin/kind; \
+		$(SUCCESS_T) KIND uninstalled; \
 	else \
-		$(WARN) KIND not found; \
+		$(WARN_T) KIND not found; \
 	fi
 
 	# Uninstall Terraform
 	$(INFO) Uninstalling Terraform...
 	@if command -v terraform > /dev/null; then \
-		sudo rm -f /usr/local/bin/terraform; \
+		rm -f /usr/local/bin/terraform; \
 		rm -rf ~/.terraform.d; \
-		$(SUCCESS) Terraform uninstalled; \
+		$(SUCCESS_T) Terraform uninstalled; \
 	else \
-		$(WARN) Terraform not found; \
+		$(WARN_T) Terraform not found; \
 	fi
 
 # Clean up temporary files and uninstall all tools
