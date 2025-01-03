@@ -2,8 +2,10 @@ services:
   ubuntu-core:
     image: ubuntu-core:latest
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./data:/app/data
+      - ./config/.kube:/root/.kube
+      - ~/.minikube:/root/.minikube
     privileged: true
     environment:
       - DEBIAN_FRONTEND=noninteractive
@@ -12,9 +14,4 @@ services:
     working_dir: /app
     tty: true
     stdin_open: true
-    networks:
-      - ubuntu-core-network
-
-networks:
-  ubuntu-core-network:
-    driver: bridge
+    network_mode: "host"
